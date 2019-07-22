@@ -1,4 +1,4 @@
-"""Infer population parameters along the main sequence, in bins of TEFF"""
+"""Infer population parameters along the red giant branch, in bins of LOGG"""
 
 # Standard library
 import os
@@ -14,14 +14,45 @@ from schwimmbad.mpi import MPIPool
 from hq.log import logger
 from hq.script_helpers import get_parser
 
-from helpers import get_metadata, get_ez_samples, get_ms_mask, run_pixel
+from helpers import (get_metadata, get_ez_samples, get_rg_mask, get_ms_mask,
+                     run_pixel)
 
 scripts_path = path.split(path.abspath(__file__))[0]
 cache_path = path.abspath(path.join(scripts_path, '../cache/'))
 plot_path = path.abspath(path.join(scripts_path, '../plots/'))
 
 
-def main(pool, overwrite=False):
+def main_rg(pool, overwrite=False):
+    # Config stuff:
+    name = 'rg'
+    logg_step = 0.25
+    logg_binsize = 1.5 * logg_step
+    logg_bincenters = np.arange(0, 4+1e-3, logg_step)
+
+    # Load all data:
+    metadata = get_metadata()
+    rg_mask = get_rg_mask(metadata['TEFF'], metadata['LOGG'])
+    metadata = metadata[rg_mask]
+
+    # Make sure paths exist:
+    for path_ in [cache_path, plot_path]:
+        os.makedirs(path_, exist_ok=True)
+
+    for i, ctr in enumerate(logg_bincenters):
+        l = ctr - logg_binsize / 2
+        r = ctr + logg_binsize / 2
+        pixel_mask = ((metadata['LOGG'] > l) & (metadata['LOGG'] <= r))
+
+        # Load samples for this bin:
+        logger.debug("{} {}: Loading samples".format(name, i))
+        ez_samples = get_ez_samples(metadata['APOGEE_ID'][pixel_mask])
+
+        # Run
+        run_pixel(name, i, ez_samples, cache_path, plot_path, pool,
+                  nwalkers=80)
+
+
+def main_ms(pool, overwrite=False):
     # Config stuff:
     name = 'ms'
     teff_step = 300
@@ -66,6 +97,9 @@ if __name__ == '__main__':
                         action="store_true",
                         help="Overwrite stuff.")
 
+    parser.add_argument("-n", "--name", dest="name", required=True, type=str,
+                        help="Name; must be either 'ms' or 'rg'")
+
     args = parser.parse_args()
 
     if args.mpi:
@@ -73,7 +107,15 @@ if __name__ == '__main__':
     else:
         Pool = SerialPool
 
-    with Pool() as pool:
-        main(pool=pool, overwrite=args.overwrite)
+    if args.name == 'ms':
+        with Pool() as pool:
+            main_ms(pool=pool, overwrite=args.overwrite)
+
+    elif args.name == 'rg':
+        with Pool() as pool:
+            main_rg(pool=pool, overwrite=args.overwrite)
+
+    else:
+        logger.error("Invalid name '{}'".format(args.name))
 
     sys.exit(0)
