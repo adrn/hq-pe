@@ -118,13 +118,12 @@ def run_pixel(name, i, ez_samples, cache_path, plot_path, pool,
         min_x = res.x
         np.save(min_filename, min_x)
 
-    else:
-        min_x = np.load(min_filename)
-
     # emcee run:
     logger.debug("{} {}: Done with minimize".format(name, i))
 
     if not path.exists(emcee_filename):
+        min_x = np.load(min_filename)
+
         # initialization for all walkers
         all_p0 = emcee.utils.sample_ball(min_x, [1e-3] * nparams,
                                          size=nwalkers)
