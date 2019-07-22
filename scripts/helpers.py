@@ -152,8 +152,8 @@ def run_pixel(name, i, ez_samples, cache_path, plot_path, pool,
                          drawstyle='steps-mid', alpha=0.4, color='k')
     axes[0].set_title(str(i))
     fig.tight_layout()
-    fig.savefig(path.join(plot_path, '{}_{:02d}_trace.png'.format(name, i),
-                dpi=250))
+    fig.savefig(path.join(plot_path, '{}_{:02d}_trace.png'.format(name, i)),
+                dpi=250)
     plt.close(fig)
 
     return True
