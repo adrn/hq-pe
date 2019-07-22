@@ -1,6 +1,7 @@
 """Infer population parameters along the red giant branch, in bins of LOGG"""
 
 # Standard library
+import os
 from os import path
 import pickle
 import sys
@@ -24,6 +25,7 @@ from helpers import get_metadata, get_ez_samples, get_rg_mask
 
 scripts_path = path.split(path.abspath(__file__))[0]
 cache_path = path.abspath(path.join(scripts_path, '../cache/'))
+plot_path = path.abspath(path.join(scripts_path, '../plots/'))
 
 
 def main(pool, overwrite=False):
@@ -40,6 +42,10 @@ def main(pool, overwrite=False):
     metadata = get_metadata()
     rg_mask = get_rg_mask(metadata['TEFF'], metadata['LOGG'])
     metadata = metadata[rg_mask]
+
+    # Make sure paths exist:
+    for path_ in [cache_path, plot_path]:
+        os.makedirs(path_, exist_ok=True)
 
     for i, ctr in enumerate(logg_bincenters):
         min_filename = path.join(cache_path, 'rg_{:02d}_res.npy')
@@ -101,6 +107,8 @@ def main(pool, overwrite=False):
                              drawstyle='steps-mid', alpha=0.4, color='k')
         axes[0].set_title('RG {}'.format(i))
         fig.tight_layout()
+        fig.savefig(path.join(plot_path, 'rg_{:02d}_trace.png'), dpi=250)
+        plt.close(fig)
 
 
 if __name__ == '__main__':

@@ -1,6 +1,7 @@
 """Infer population parameters along the main sequence, in bins of TEFF"""
 
 # Standard library
+import os
 from os import path
 import pickle
 import sys
@@ -24,6 +25,7 @@ from helpers import get_metadata, get_ez_samples, get_ms_mask
 
 scripts_path = path.split(path.abspath(__file__))[0]
 cache_path = path.abspath(path.join(scripts_path, '../cache/'))
+plot_path = path.abspath(path.join(scripts_path, '../plots/'))
 
 
 def main(pool, overwrite=False):
@@ -40,6 +42,10 @@ def main(pool, overwrite=False):
     metadata = get_metadata()
     ms_mask = get_ms_mask(metadata['TEFF'], metadata['LOGG'])
     metadata = metadata[ms_mask]
+
+    # Make sure paths exist:
+    for path_ in [cache_path, plot_path]:
+        os.makedirs(path_, exist_ok=True)
 
     for i, ctr in enumerate(teff_bincenters):
         min_filename = path.join(cache_path, 'ms_{:02d}_res.npy')
@@ -101,6 +107,8 @@ def main(pool, overwrite=False):
                              drawstyle='steps-mid', alpha=0.4, color='k')
         axes[0].set_title('MS {}'.format(i))
         fig.tight_layout()
+        fig.savefig(path.join(plot_path, 'ms_{:02d}_trace.png'), dpi=250)
+        plt.close(fig)
 
 
 if __name__ == '__main__':
