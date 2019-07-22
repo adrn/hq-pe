@@ -14,7 +14,7 @@ import yaml
 # Project
 from hq.config import HQ_CACHE_PATH, config_to_alldata
 from hq.log import logger
-from .model import Model
+from model import Model
 
 __all__ = ['get_metadata', 'get_ez_samples',
            'get_ms_mask', 'get_rg_mask']
