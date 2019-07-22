@@ -20,13 +20,18 @@ scripts_path = path.split(path.abspath(__file__))[0]
 cache_path = path.abspath(path.join(scripts_path, '../cache/'))
 plot_path = path.abspath(path.join(scripts_path, '../plots/'))
 
+logg_step = 0.25
+logg_binsize = 1.5 * logg_step
+logg_bincenters = np.arange(0, 4+1e-3, logg_step)
+
+teff_step = 300
+teff_binsize = 1.5 * teff_step
+teff_bincenters = np.arange(3400, 7000+1e-3, teff_step)
+
 
 def main_rg(pool, overwrite=False):
     # Config stuff:
     name = 'rg'
-    logg_step = 0.25
-    logg_binsize = 1.5 * logg_step
-    logg_bincenters = np.arange(0, 4+1e-3, logg_step)
 
     # Load all data:
     metadata = get_metadata()
@@ -54,9 +59,6 @@ def main_rg(pool, overwrite=False):
 def main_ms(pool, overwrite=False):
     # Config stuff:
     name = 'ms'
-    teff_step = 300
-    teff_binsize = 1.5 * teff_step
-    teff_bincenters = np.arange(3400, 7000+1e-3, teff_step)
 
     # Load all data:
     metadata = get_metadata()
