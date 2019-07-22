@@ -7,8 +7,7 @@ import sys
 
 # Third-party
 import numpy as np
-from schwimmbad import SerialPool
-from schwimmbad.mpi import MPIPool
+from schwimmbad import choose_pool
 
 # Project
 from hq.log import logger
@@ -102,20 +101,20 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    if args.mpi:
-        Pool = MPIPool
-    else:
-        Pool = SerialPool
-
-    if args.name == 'ms':
-        with Pool() as pool:
+    pool = choose_pool(mpi=args.mpi)
+    try:
+        if args.name == 'ms':
             main_ms(pool=pool, overwrite=args.overwrite)
 
-    elif args.name == 'rg':
-        with Pool() as pool:
+        elif args.name == 'rg':
             main_rg(pool=pool, overwrite=args.overwrite)
 
-    else:
-        logger.error("Invalid name '{}'".format(args.name))
+        else:
+            logger.error("Invalid name '{}'".format(args.name))
+
+        pool.close()
+    except Exception as e:
+        pool.close()
+        raise e
 
     sys.exit(0)
