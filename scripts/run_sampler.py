@@ -31,6 +31,7 @@ teff_bincenters = np.arange(3400, 7000+1e-3, teff_step)
 mh_step = 0.1
 mh_binsize = 2 * mh_step
 mh_bincenters = np.arange(-1.0, 0.3+1e-3, mh_step)
+rg_mh_bincenters = np.arange(-2.0, 0.4+1e-3, mh_step)
 
 
 def main_rg(pool, overwrite=False):
@@ -115,7 +116,7 @@ def main_rg_mh(pool, overwrite=False):
     rg_mask = get_rg_mask(metadata['TEFF'], metadata['LOGG'])
     metadata = metadata[rg_mask]
 
-    for i, ctr in enumerate(mh_bincenters):
+    for i, ctr in enumerate(rg_mh_bincenters):
         l = ctr - mh_binsize / 2
         r = ctr + mh_binsize / 2
         pixel_mask = ((metadata['M_H'] > l) & (metadata['M_H'] <= r))
