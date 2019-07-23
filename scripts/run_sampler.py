@@ -105,6 +105,30 @@ def main_ms_mh(pool, overwrite=False):
                   nwalkers=80)
 
 
+def main_rg_mh(pool, overwrite=False):
+    """Run red giants in bins of [M/H]"""
+    # Config stuff:
+    name = 'rg-mh'
+
+    # Load all data:
+    metadata = get_metadata()
+    rg_mask = get_rg_mask(metadata['TEFF'], metadata['LOGG'])
+    metadata = metadata[rg_mask]
+
+    for i, ctr in enumerate(mh_bincenters):
+        l = ctr - mh_binsize / 2
+        r = ctr + mh_binsize / 2
+        pixel_mask = ((metadata['M_H'] > l) & (metadata['M_H'] <= r))
+
+        # Load samples for this bin:
+        logger.debug("{} {}: Loading samples".format(name, i))
+        ez_samples = get_ez_samples(metadata['APOGEE_ID'][pixel_mask])
+
+        # Run
+        run_pixel(name, i, ez_samples, cache_path, plot_path, pool,
+                  nwalkers=80)
+
+
 if __name__ == '__main__':
     # Define parser object
     parser = get_parser(description='Hierarchical inference for main sequence',
@@ -121,7 +145,7 @@ if __name__ == '__main__':
                         help="Overwrite stuff.")
 
     parser.add_argument("-n", "--name", dest="name", required=True,
-                        choices=['ms', 'rg', 'ms_mh'])
+                        choices=['ms', 'rg', 'ms_mh', 'rg_mh'])
 
     args = parser.parse_args()
 
