@@ -20,7 +20,7 @@ __all__ = ['get_metadata', 'get_ez_samples',
            'get_ms_mask', 'get_rg_mask']
 
 
-def get_metadata(apply_llr_mask=True, apply_qual_mask=True):
+def get_metadata(apply_qual_mask=True, min_n_visits=5):
     # Load VAC products:
     metadata = QTable.read(path.join(HQ_CACHE_PATH,
                                      'dr16/metadata-master.fits'))
@@ -32,15 +32,11 @@ def get_metadata(apply_llr_mask=True, apply_qual_mask=True):
     metadata = join(metadata, allstar, keys='APOGEE_ID')
     mask = np.ones(len(metadata), dtype=bool)
 
-    # Apply quality and log-likelihood-ratio cuts:
-
-    if apply_llr_mask:
-        llr_mask = (metadata['max_unmarginalized_ln_likelihood'] -
-                    metadata['robust_constant_ln_likelihood']) > 6
-        mask &= llr_mask
+    # Apply quality cuts:
 
     if apply_qual_mask:
-        qual_mask = metadata['unimodal'] | (metadata['n_visits'] >= 4)
+        qual_mask = (metadata['unimodal'] |
+                     (metadata['n_visits'] >= min_n_visits))
         qual_mask &= (metadata['LOGG'] > -0.5) & (metadata['TEFF'] > 3200)
         mask &= qual_mask
 
