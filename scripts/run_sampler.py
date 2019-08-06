@@ -13,8 +13,8 @@ from schwimmbad import choose_pool
 from hq.log import logger
 from hq.script_helpers import get_parser
 
-from helpers import (get_metadata, get_ez_samples, get_rg_mask, get_ms_mask,
-                     run_pixel)
+from helpers import get_metadata, get_ez_samples, get_rg_mask, get_ms_mask
+from model_ez import run_pixel
 
 scripts_path = path.split(path.abspath(__file__))[0]
 cache_path = path.abspath(path.join(scripts_path, '../cache/'))
